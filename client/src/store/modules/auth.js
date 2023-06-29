@@ -12,7 +12,7 @@ export const auth = {
     login({ commit }, user) {
       return AuthService.login(user.username, user.password).then(
         user => {
-          commit('loginSuccess', user);
+          commit('loginSuccess', user.data);
           return Promise.resolve(user);
         },
         error => {
@@ -22,8 +22,12 @@ export const auth = {
       );
     },
     logout({ commit }) {
-      AuthService.logout();
-      commit('logout');
+      return AuthService.logout().then(
+        response => {
+          commit('logout');
+          return Promise.resolve(response)
+        }
+      )
     },
     register({ commit }, user) {
       return AuthService.signup(user.username, user.password, user.firstname, user.lastname).then(
@@ -36,11 +40,19 @@ export const auth = {
           return Promise.reject(error);
         }
       );
+    },
+    setProfileData({commit}) {
+      return AuthService.profile().then(
+        reponse => {
+          commit('setProfileData', reponse.data.profile[0])
+        })
     }
   },
   mutations: {
     loginSuccess(state, user) {
       state.status.loggedIn = true;
+      localStorage.setItem('user', JSON.stringify(user))
+      // $cookies.set('user123', JSON.stringify(user), '3d')
       state.user = user;
     },
     loginFailure(state) {
@@ -50,12 +62,16 @@ export const auth = {
     logout(state) {
       state.status.loggedIn = false;
       state.user = null;
+      localStorage.clear()
     },
     registerSuccess(state) {
       state.status.loggedIn = false;
     },
     registerFailure(state) {
       state.status.loggedIn = false;
+    },
+    setProfileData(state, profile) {
+      state.user = profile
     }
   }
 };

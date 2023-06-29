@@ -18,6 +18,8 @@
   },
   "devDependencies": {
     "bcrypt": "^5.1.0",
-    "nodemon": "^2.0.22"
+    "cookie-parser": "^1.4.6",
+    "nodemon": "^2.0.22",
+    "socket.io": "^4.7.1"
   }
 }

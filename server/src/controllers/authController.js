@@ -47,7 +47,6 @@ module.exports.signup_post = async (req, res) => {
 
 module.exports.login_post = async (req, res) => {
     const { username, password } = req.body;
-
     try {
         const user = await User.login(username, password);
         const token = createToken(user._id);
@@ -58,10 +57,9 @@ module.exports.login_post = async (req, res) => {
         const errors = handleErrors(err);
         res.status(400).json({ errors });
     }
-
 }
 
-module.exports.logout_get = (req, res) => {
-    res.cookie('jwt', '', { maxAge: 1 });
-    res.status(200).json({logout: true})
+module.exports.logout_post = (req, res) => {
+    res.cookie('jwt', 'token', { httpOnly: true, maxAge: 1 });
+    res.status(200).json({user: {}})
 }
