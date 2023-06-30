@@ -80,7 +80,8 @@ io.sockets.on("connection", socket => {
             rooms.push({
                 streamName: data.streamName,
                 roomName: data.roomName,
-                members: []
+                members: [],
+                broadcaster: socket.id
             })
         }
         socket.join(data.roomName)
@@ -116,6 +117,7 @@ io.sockets.on("connection", socket => {
                     roomName: rooms[roomIndex].roomName,
                     streamName: rooms[roomIndex].streamName
                 })
+            socket.to(rooms[roomIndex].broadcaster).emit('join room', socket.id)
         } else {
             io.to(data.roomName).emit('end of stream')
             socket.leave(data.roomName)
@@ -138,6 +140,18 @@ io.sockets.on("connection", socket => {
                     streamName: rooms[roomIndex].streamName
                 })
         }
+    })
+
+    socket.on('icecandidate', (id, candidate) => {
+        socket.to(id).emit("icecandidate", socket.id, candidate)
+    })
+
+    socket.on('offer', (id, description) => {
+        socket.to(id).emit("offer", socket.id, description)
+    })
+
+    socket.on("answer", (id, message) => {
+        socket.to(id).emit("answer", socket.id, message)
     })
 });
 

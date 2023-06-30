@@ -74,17 +74,9 @@ export default {
       return this.$store.state.auth.user
     }
   },
-  updated(){
-
-      console.log('change route')
-      this.socket.emit('left room', {roomName: this.roomName, user: this.user})
-      this.socket.close();
-      this.peerConnection.close();
-
-  },
   mounted() {
     console.log('join room')
-
+    this.video = document.querySelector("video")
 
     this.socket.emit('join room', {roomName: this.roomName, user: this.user})
 
@@ -99,6 +91,32 @@ export default {
       this.$router.push('/')
     })
 
+    this.socket.on('offer', (id, description) => {
+      this.peerConnection = new RTCPeerConnection(this.config)
+      this.peerConnection
+        .setRemoteDescription(description)
+        .then(() => this.peerConnection.createAnswer())
+        .then(sdp => this.peerConnection.setLocalDescription(sdp))
+        .then(() => {
+          this.socket.emit('answer', id, this.peerConnection.localDescription)
+        })
+      this.peerConnection.ontrack = event => {
+        this.started = true
+        this.toggleTimer()
+        this.video.srcObject = event.streams[0]
+      }
+      this.peerConnection.onicecandidate = event => {
+        if (event.candidate) {
+          this.socket.emit('icecandidate', id, event.candidate)
+        }
+      }
+    })
+
+    this.socket.on('icecandidate', (id, candidate) => {
+      this.peerConnection
+        .addIceCandidate(new RTCIceCandidate(candidate))
+        .catch(e => console.error(e));
+    })
 
     window.onunload = window.onbeforeunload = () => {
       this.socket.emit('left room', {roomName: this.roomName, user: this.user})
