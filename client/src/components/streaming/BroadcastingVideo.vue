@@ -80,151 +80,48 @@ export default {
           }
         ]
       },
-      socket: io.connect('http://localhost:8081/'),
+      socket: null,//io.connect('http://localhost:8081/',),
       videoElement: document.querySelector("video"),
       audioSelect: document.querySelector("select#audioSource"),
       videoSelect: document.querySelector("select#videoSource"),
-
+      room: {},
     }
   },
-  mounted() {
-
-
+  computed: {
+    user() {
+      return this.$store.state.auth.user
+    }
   },
   methods: {
-    toggleTimer() {
-      if (this.started) {
-        clearInterval(this.interval);
-        console.log('timer stops');
-      } else {
-        this.interval = setInterval(this.incrementTime, 1000);
-      }
-      this.isRunning = !this.isRunning
-    },
-    incrementTime() {
-      this.time = parseInt(this.time) + 1;
-    },
     stopStreaming() {
-      console.log('stop streaming')
-      this.toggleTimer()
-      this.time=0
-      this.videoElement.srcObject = null
       this.started = false
-      Object.entries(this.peerConnections).forEach(([key, value]) => {
-        value.close()
-      });
       this.viewers = 0
-      console.log('end of stream')
-      this.socket.emit("endOfStream", {})
+      this.socket.emit('end of stream', {
+        streamName: this.streamName,
+        roomName: this.user.username,
+      })
     },
     startStreaming() {
-      console.log('start of stream')
-      this.toggleTimer()
       this.started = true
-      this.socket.on("answer", (id, description) => {
-        this.peerConnections[id].setRemoteDescription(description)
+      this.socket = io.connect('http://localhost:8081/',)
+      this.socket.emit('create room', {
+        streamName: this.streamName,
+        roomName: this.user.username,
       })
 
-      this.socket.on("watcher", id => {
-        this.viewers += 1
-        this.socket.emit("viewers", {
-          viewers: this.viewers,
-          time: this.time,
-          name: this.streamName
-        })
-        const peerConnection = new RTCPeerConnection(this.config)
-        this.peerConnections[id] = peerConnection
-
-        let stream = this.videoElement.srcObject
-        stream.getTracks().forEach(track => peerConnection.addTrack(track, stream))
-
-        peerConnection.onicecandidate = event => {
-          if (event.candidate) {
-            this.socket.emit("candidate", id, event.candidate)
-          }
-        };
-
-        peerConnection
-          .createOffer()
-          .then(sdp => peerConnection.setLocalDescription(sdp))
-          .then(() => {
-            this.socket.emit("offer", id, peerConnection.localDescription)
-          });
+      this.socket.on('stream info', data => {
+        this.viewers = data.viewers
       })
-
-      this.socket.on("candidate", (id, candidate) => {
-        this.peerConnections[id].addIceCandidate(new RTCIceCandidate(candidate));
-      });
-
-      this.socket.on("disconnectPeer", id => {
-        this.viewers -= 1
-        this.socket.emit("viewers", {viewers: this.viewers})
-        this.peerConnections[id].close();
-        delete this.peerConnections[id];
-      });
 
       window.onunload = window.onbeforeunload = () => {
+        this.viewers = 0
+        this.socket.emit('end of stream', {
+          streamName: this.streamName,
+          roomName: this.user.username,
+        })
         this.socket.close();
+        this.peerConnection.close();
       };
-
-      this.videoElement = document.querySelector("video");
-      this.audioSelect = document.querySelector("select#audioSource");
-      this.videoSelect = document.querySelector("select#videoSource");
-
-      this.audioSelect.onchange = this.getStream
-      this.videoSelect.onchange = this.getStream
-
-      this.getStream()
-        .then(this.getDevices)
-        .then(this.gotDevices)
-    },
-    getDevices() {
-      return navigator.mediaDevices.enumerateDevices();
-    },
-    gotDevices(deviceInfos) {
-      window.deviceInfos = deviceInfos;
-      for (const deviceInfo of deviceInfos) {
-        const option = document.createElement("option");
-        option.value = deviceInfo.deviceId;
-        if (deviceInfo.kind === "audioinput") {
-          option.text = deviceInfo.label || `Microphone ${this.audioSelect.length + 1}`;
-          this.audioSelect.appendChild(option);
-        } else if (deviceInfo.kind === "videoinput") {
-          option.text = deviceInfo.label || `Camera ${this.videoSelect.length + 1}`;
-          this.videoSelect.appendChild(option);
-        }
-      }
-    },
-    getStream() {
-      if (window.stream) {
-        window.stream.getTracks().forEach(track => {
-          track.stop();
-        });
-      }
-      const audioSource = this.audioSelect.value;
-      const videoSource = this.videoSelect.value;
-      const constraints = {
-        audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
-        video: { deviceId: videoSource ? { exact: videoSource } : undefined }
-      };
-      return navigator.mediaDevices
-        .getUserMedia(constraints)
-        .then(this.gotStream)
-        .catch(this.handleError);
-    },
-    gotStream(stream) {
-      window.stream = stream;
-      this.audioSelect.selectedIndex = [...this.audioSelect.options].findIndex(
-        option => option.text === stream.getAudioTracks()[0].label
-      );
-      this.videoSelect.selectedIndex = [...this.videoSelect.options].findIndex(
-        option => option.text === stream.getVideoTracks()[0].label
-      );
-      this.videoElement.srcObject = stream;
-      this.socket.emit("broadcaster");
-    },
-    handleError(error) {
-      console.error("Error: ", error);
     }
   }
 }

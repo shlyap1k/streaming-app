@@ -66,35 +66,79 @@ const io = require('socket.io')(server, {
     }
 });
 
+
+let broadcaster
+let roomIndex
+let userIndex
+const rooms = []
+
 io.sockets.on("error", e => console.log(e));
 io.sockets.on("connection", socket => {
-    socket.on("broadcaster", () => {
-        broadcaster = socket.id;
-        socket.broadcast.emit("broadcaster");
-    });
-    socket.on("watcher", () => {
-        socket.to(broadcaster).emit("watcher", socket.id);
-    });
-    socket.on("offer", (id, message) => {
-        socket.to(id).emit("offer", socket.id, message);
-    });
-    socket.on("answer", (id, message) => {
-        socket.to(id).emit("answer", socket.id, message);
-    });
-    socket.on("candidate", (id, message) => {
-        socket.to(id).emit("candidate", socket.id, message);
-    });
-    socket.on("viewers", (message) => {
-        console.log(message)
-        io.emit("viewersCount", message);
-    });
-    socket.on("endOfStream", (message) => {
-        console.log('endOfStream')
-        io.emit("endOfStream", message)
+    socket.on('create room', data => {
+        roomIndex = rooms.map(r => r.roomName).indexOf(data.roomName)
+        if (!(roomIndex > -1)) {
+            rooms.push({
+                streamName: data.streamName,
+                roomName: data.roomName,
+                members: []
+            })
+        }
+        socket.join(data.roomName)
+        io.emit('rooms list', rooms.map(r => [r.roomName, r.streamName, r.members.length]))
     })
-    socket.on("disconnect", () => {
-        socket.to(broadcaster).emit("disconnectPeer", socket.id);
-    });
+
+    socket.on('end of stream', data => {
+        roomIndex = rooms.map(r => r.roomName).indexOf(data.roomName)
+        if (roomIndex > -1) {
+            rooms.splice(roomIndex, 1) // delete room
+        }
+        socket.broadcast.to(data.roomName).emit('end of stream') // event for users are watching stream
+        io.emit('rooms list', rooms.map(r => [r.roomName, r.streamName, r.members.length])) // update rooms list for
+        // users are not watching any stream but on page with streams list
+    })
+
+    socket.on('get rooms', () => {
+        socket.emit('rooms list', rooms.map(r => [r.roomName, r.streamName, r.members.length]))
+    })
+
+    socket.on('join room', data => {
+        socket.join(data.roomName)
+        roomIndex = rooms.map(r => r.roomName).indexOf(data.roomName)
+        if (roomIndex > -1) {
+            userIndex = rooms[roomIndex].members.indexOf(data.user._id)
+            if (userIndex < 0) {
+                rooms[roomIndex].members.push(data.user._id)
+            }
+            io
+                .to(data.roomName)
+                .emit('stream info', {
+                    viewers: rooms[roomIndex].members.length,
+                    roomName: rooms[roomIndex].roomName,
+                    streamName: rooms[roomIndex].streamName
+                })
+        } else {
+            io.to(data.roomName).emit('end of stream')
+            socket.leave(data.roomName)
+        }
+    })
+
+    socket.on('left room', data => {
+        socket.leave(data.roomName)
+        roomIndex = rooms.map(r => r.roomName).indexOf(data.roomName)
+        if (roomIndex > -1) {
+            userIndex = rooms[roomIndex].members.indexOf(data.user._id)
+            if (userIndex > -1) {
+                rooms[roomIndex].members.splice(userIndex, 1)
+            }
+            io
+                .to(data.roomName)
+                .emit('stream info', {
+                    viewers: rooms[roomIndex].members.length,
+                    roomName: rooms[roomIndex].roomName,
+                    streamName: rooms[roomIndex].streamName
+                })
+        }
+    })
 });
 
 mongoose.connection

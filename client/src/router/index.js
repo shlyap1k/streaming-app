@@ -44,6 +44,11 @@ const routes = [
         }
       },
       {
+        path: 'watch/:username',
+        name: 'Просмотр',
+        component: () => import('@/views/Watcher')
+      },
+      {
         path: 'posts',
         name: 'Posts List',
         component: () => import(/* webpackChunkName: "home" */ '@/components/PostsList.vue'),
