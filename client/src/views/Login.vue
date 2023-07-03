@@ -27,6 +27,7 @@
           <v-btn type="submit" block class="mt-2">Войти</v-btn>
 
         </v-form>
+        <router-link to="/register">Зарегистрироваться</router-link>
       </v-card-text>
     </v-card>
   </v-container>
