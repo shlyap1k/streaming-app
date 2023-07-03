@@ -33,7 +33,7 @@ jobs:
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
-          source: ./client/
+          source: ./
           destination: ./_site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
@@ -55,8 +55,10 @@ jobs:
           cache: 'npm'
           cache-dependency-path: client/package-lock.json
       - name: Install dependencies
+        working-directory: './client'
         run: npm install
       - name: Build
+        working-directory: './client'
         run: npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v3
@@ -64,7 +66,7 @@ jobs:
         uses: actions/upload-pages-artifact@v1
         with:
           # Upload dist repository
-          path: './dist'
+          path: ./dist
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
