@@ -61,7 +61,7 @@ export default {
           },
         ]
       },
-      socket: io.connect('http://localhost:8081/'),
+      socket: io.connect(import.meta.env.VITE_SOCKET_SERVER),
       video: document.querySelector("video"),
       // enableAudioButton: null,
     }

@@ -85,7 +85,7 @@ io.sockets.on("connection", socket => {
             })
         }
         socket.join(data.roomName)
-        io.emit('rooms list', rooms.map(r => [r.roomName, r.streamName, r.members.length]))
+        io.emit('rooms list', rooms)
     })
 
     socket.on('end of stream', data => {
@@ -94,12 +94,18 @@ io.sockets.on("connection", socket => {
             rooms.splice(roomIndex, 1) // delete room
         }
         socket.broadcast.to(data.roomName).emit('end of stream') // event for users are watching stream
-        io.emit('rooms list', rooms.map(r => [r.roomName, r.streamName, r.members.length])) // update rooms list for
+        io.emit('rooms list', rooms) // update rooms list for
         // users are not watching any stream but on page with streams list
     })
 
     socket.on('get rooms', () => {
-        socket.emit('rooms list', rooms.map(r => [r.roomName, r.streamName, r.members.length]))
+        socket.emit('rooms list', rooms)
+    })
+
+    socket.on('set room preview', data => {
+        roomIndex = rooms.map(r => r.roomName).indexOf(data.roomName)
+        rooms[roomIndex].image = data.image
+        io.emit('rooms list', rooms)
     })
 
     socket.on('join room', data => {

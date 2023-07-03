@@ -52,7 +52,9 @@
               ></v-text-field>
 
               <v-btn type="submit" block class="mt-2">Зарегистрироваться</v-btn>
-
+              <v-divider></v-divider>
+              Уже зарегистрированы?
+              <router-link to="/login">Войти</router-link>
             </v-form>
           </v-card-text>
         </v-card>
@@ -114,6 +116,7 @@ export default {
         data => {
           this.message = data.message;
           this.successful = true;
+          this.$router.push('/login')
         },
         error => {
           this.message =

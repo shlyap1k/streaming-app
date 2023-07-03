@@ -13,48 +13,57 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="3">
+              <v-col cols="auto">
                 <v-btn v-if="!started" v-on:click="startStreaming" color="#80CBC4" text="Начать трансляцию"></v-btn>
                 <v-btn v-else v-on:click="stopStreaming" color="#EF9A9A" text="Завершить трансляцию"></v-btn>
               </v-col>
-              <v-col cols="3" v-if="!started">
+              <v-col cols="auto">
+                <v-btn v-if="started" v-on:click="takePicture" text="Заставка"></v-btn>
+              </v-col>
+              <v-col cols="auto" v-if="!started">
                 <v-text-field
                   label="Название трансляции"
                   v-model="streamName"
                   solo
                 ></v-text-field>
               </v-col>
-              <v-col cols="3" v-else>
+              <v-col cols="auto" v-else>
                 {{streamName}}
               </v-col>
-              <v-col cols="3">
+              <v-col cols="auto">
                 Длительность трансляции: {{("0" + (time/3600>>0)).slice(-2)
                 }}:{{("0" + (time/60>>0)).slice(-2)
                 }}:{{("0" + Number(((time/60-(time/60>>0))*60).toFixed(0))).slice(-2)}}
               </v-col>
-              <v-col cols="3">
+              <v-col cols="auto">
                 <v-icon color="#F44336">mdi-account-outline</v-icon> <span class="red--text">{{viewers}}</span>
               </v-col>
             </v-row>
             <v-row>
               <v-col>
-                <section class="select">
-                  <label for="audioSource">Источник аудио: </label>
-                  <select id="audioSource"></select>
-                </section>
+                <v-row>
+                  <section class="select">
+                    <label for="audioSource">Источник аудио: </label>
+                    <select id="audioSource"></select>
+                  </section>
+                </v-row>
+                <v-row>
+                  <section class="select">
+                    <label for="videoSource">Источник видео: </label>
+                    <select id="videoSource"></select>
+                  </section>
+                </v-row>
               </v-col>
-            </v-row>
-            <v-row>
               <v-col>
-                <section class="select">
-                  <label for="videoSource">Источник видео: </label>
-                  <select id="videoSource"></select>
-                </section>
+                <v-row>
+                  Текущая заставка:
+                </v-row>
+                <v-row>
+                  <canvas id="canvas"> </canvas>
+                </v-row>
               </v-col>
             </v-row>
           </v-card-text>
-          <v-card-actions>
-          </v-card-actions>
         </v-responsive>
       </v-card>
     </v-col>
@@ -69,6 +78,8 @@ export default {
     return {
       time: 0,
       interval: null,
+      canvas: document.getElementById("canvas"),
+      photo: document.getElementById("photo"),
       streamName: 'Прямая трансляция',
       viewers: 0,
       started: false,
@@ -103,7 +114,7 @@ export default {
     },
     startStreaming() {
       this.started = true
-      this.socket = io.connect('http://localhost:8081/',)
+      this.socket = io.connect(import.meta.env.VITE_SOCKET_SERVER,)
       this.socket.emit('create room', {
         streamName: this.streamName,
         roomName: this.user.username,
@@ -208,6 +219,26 @@ export default {
       );
       this.videoElement.srcObject = stream;
       this.socket.emit("broadcaster");
+    },
+    takePicture() {
+      const width = 300
+      const height = 169
+      this.canvas = document.getElementById("canvas")
+      this.photo = document.getElementById("photo")
+      const context = this.canvas.getContext("2d");
+      if (width && height) {
+        this.canvas.width = width;
+        this.canvas.height = height;
+        context.drawImage(this.videoElement, 0, 0, width, height);
+
+        const data =this. canvas.toDataURL("image/png");
+        // this.photo.setAttribute("src", data);
+        console.log(data)
+        this.socket.emit('set room preview', {
+          roomName: this.user.username,
+          image: data
+        })
+      }
     },
     handleError(error) {
       console.error("Error: ", error);

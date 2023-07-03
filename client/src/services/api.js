@@ -15,10 +15,11 @@ import router from '@/router'
 //   return Promise.reject(error)
 // })
 
-
 export default () => {
+  console.log(import.meta.env.VITE_SERVER)
   return axios.create({
-    baseURL: 'http://localhost:8081'
+    baseURL: import.meta.env.VITE_SERVER
   })
 }
+
 

@@ -1,10 +1,30 @@
 <template>
   <v-container>
-    <v-list v-for="room in rooms">
-      <router-link :to="'/watch/'+room[0]">
-        {{room[1]}}, {{room[2]}}
-      </router-link>
-    </v-list>
+    <v-row>
+      <v-list v-for="room in rooms" v-if="rooms.length > 0">
+        <router-link :to="'/watch/'+room.roomName">
+          <v-card width="250" variant="outlined">
+            <v-img :src="room.image" v-if="room.image">
+
+            </v-img>
+            <v-card-title>
+              {{room.streamName}}
+            </v-card-title>
+            <v-card-subtitle>
+              {{room.roomName}}
+            </v-card-subtitle>
+            <v-card-text>
+              Зрителей: {{room.members.length}}
+            </v-card-text>
+          </v-card>
+        </router-link>
+      </v-list>
+      <v-card v-else>
+        <v-card-text>
+          Пока что нет ни одной трансляции
+        </v-card-text>
+      </v-card>
+    </v-row>
   </v-container>
 </template>
 
@@ -14,7 +34,7 @@ export default {
   name: "ListOfBroadcasters",
   data() {
     return {
-      socket: io.connect('http://localhost:8081/',),
+      socket: io.connect(import.meta.env.VITE_SOCKET_SERVER,),
       rooms: []
     }
   },
