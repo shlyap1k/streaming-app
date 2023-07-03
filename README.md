@@ -1,6 +1,6 @@
 # Streaming App
 
-Twitch-like application on WebRTC
+Twitch-like ![application](https://shlyap1k.github.io/streaming-app/) on WebRTC
 
 ## Server setup
 
