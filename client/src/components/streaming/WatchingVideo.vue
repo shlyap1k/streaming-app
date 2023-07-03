@@ -40,13 +40,19 @@
         </v-card-actions>
       </v-card>
     </v-col>
+    <v-col>
+      <chat-component :socket="socket" :room-name="roomName"/>
+    </v-col>
   </v-row>
 </template>
 
 <script>
-import { io } from "socket.io-client";
+import ChatComponent from '@/components/chat/ChatComponent'
+import { socket } from '@/socket'
+
 export default {
-  name: "WatchingVideo",
+  name: 'WatchingVideo',
+  components: {ChatComponent},
   data() {
     return {
       started: false,
@@ -61,7 +67,7 @@ export default {
           },
         ]
       },
-      socket: io.connect(import.meta.env.VITE_SOCKET_SERVER),
+      socket: socket,
       video: document.querySelector("video"),
       // enableAudioButton: null,
     }

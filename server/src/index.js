@@ -159,6 +159,11 @@ io.sockets.on("connection", socket => {
     socket.on("answer", (id, message) => {
         socket.to(id).emit("answer", socket.id, message)
     })
+
+    socket.on("new message", (message) => {
+        console.log(message)
+        io.to(message.roomName).emit('new message', message)
+    })
 });
 
 mongoose.connection

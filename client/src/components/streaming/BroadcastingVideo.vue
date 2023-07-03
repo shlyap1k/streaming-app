@@ -1,6 +1,6 @@
 <template>
   <v-row no-gutters>
-    <v-col align-self="center">
+    <v-col align-self="center" cols="9">
       <v-card max-width="1200" class="pa-2 ma-2">
         <v-responsive aspect-ratio="16/9">
           <v-card-title>
@@ -20,7 +20,7 @@
               <v-col cols="auto">
                 <v-btn v-if="started" v-on:click="takePicture" text="Заставка"></v-btn>
               </v-col>
-              <v-col cols="auto" v-if="!started">
+              <v-col cols="3" v-if="!started">
                 <v-text-field
                   label="Название трансляции"
                   v-model="streamName"
@@ -67,13 +67,22 @@
         </v-responsive>
       </v-card>
     </v-col>
+    <v-col cols="3">
+      <chat-component :socket="socket" :room-name="user.username"/>
+    </v-col>
   </v-row>
 </template>
 
 <script>
-import { io } from "socket.io-client";
+import { io } from 'socket.io-client'
+import ChatComponent from '@/components/chat/ChatComponent'
+import { socket } from '@/socket'
+
 export default {
-  name: "BroadcastingVideo",
+  name: 'BroadcastingVideo',
+  components: {
+    ChatComponent
+  },
   data() {
     return {
       time: 0,
@@ -114,7 +123,7 @@ export default {
     },
     startStreaming() {
       this.started = true
-      this.socket = io.connect(import.meta.env.VITE_SOCKET_SERVER,)
+      this.socket = socket
       this.socket.emit('create room', {
         streamName: this.streamName,
         roomName: this.user.username,
@@ -233,7 +242,6 @@ export default {
 
         const data =this. canvas.toDataURL("image/png");
         // this.photo.setAttribute("src", data);
-        console.log(data)
         this.socket.emit('set room preview', {
           roomName: this.user.username,
           image: data
