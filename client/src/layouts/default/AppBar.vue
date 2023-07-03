@@ -1,8 +1,7 @@
 <template>
   <v-col>
     <v-navigation-drawer
-      expand-on-hover
-      rail
+      v-model="drawer"
       v-if="loggedIn"
     >
       <v-list>
@@ -25,7 +24,7 @@
     <v-app-bar
       density="compact"
     >
-
+      <v-app-bar-nav-icon variant="text" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-app-bar-title>watch and stream</v-app-bar-title>
 
       <template v-slot:append v-if="loggedIn">
