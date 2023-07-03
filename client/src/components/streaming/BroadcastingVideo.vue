@@ -1,6 +1,6 @@
 <template>
   <v-row no-gutters>
-    <v-col align-self="center" cols="9">
+    <v-col cols="8">
       <v-card max-width="1200" class="pa-2 ma-2">
         <v-responsive aspect-ratio="16/9">
           <v-card-title>
@@ -54,21 +54,25 @@
                   </section>
                 </v-row>
               </v-col>
-              <v-col>
-                <v-row>
-                  Текущая заставка:
-                </v-row>
-                <v-row>
-                  <canvas id="canvas"> </canvas>
-                </v-row>
-              </v-col>
             </v-row>
           </v-card-text>
         </v-responsive>
       </v-card>
     </v-col>
-    <v-col cols="3">
-      <chat-component :socket="socket" :room-name="user.username"/>
+    <v-col cols="4">
+      <v-row align-self="right">
+        <v-card class="pa-2 ma-2">
+          <v-card-title>
+            Текущая заставка трансляции
+          </v-card-title>
+          <v-card-text>
+            <canvas id="canvas"> </canvas>
+          </v-card-text>
+        </v-card>
+      </v-row>
+      <v-row>
+        <chat-component :socket="socket" :room-name="user.username"/>
+      </v-row>
     </v-col>
   </v-row>
 </template>

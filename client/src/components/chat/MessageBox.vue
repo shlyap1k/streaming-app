@@ -2,7 +2,7 @@
   <v-container>
     <v-form name="form" @submit.prevent="onSubmit">
       <v-row>
-        <v-col cols="10">
+        <v-col cols="9">
           <v-text-field
             v-model="text"
             :rules="[rules.required, rules.counter]"

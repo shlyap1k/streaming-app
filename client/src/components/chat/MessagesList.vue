@@ -16,7 +16,6 @@ export default {
   },
   mounted() {
     socket.on('new message', message => {
-      console.log(message)
       this.messages.push(message)
     })
   }
