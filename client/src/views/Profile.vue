@@ -22,14 +22,10 @@ export default {
       return this.$store.state.auth.user
     }
   },
-  // created() {
-  //   this.$store.dispatch('auth/setProfileData')
-  // },
   mounted() {
     if (!this.loggedIn) {
       this.$router.push('/login');
     }
-    // this.$store.dispatch('auth/setProfileData')
   }
 }
 </script>

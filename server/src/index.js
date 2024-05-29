@@ -7,6 +7,8 @@ const express = require('express'),
     jwt = require('jsonwebtoken'),
     authRoutes = require('./routes/authRoutes'),
     userRoutes = require('./routes/user'),
+    cameraRoutes = require('./routes/cameraRoutes')
+    counterRoutes = require('./routes/counterRoutes')
     cookieParser = require("cookie-parser");
 
 
@@ -29,6 +31,8 @@ app.use(cookieParser())
 app.use(require('./routes/posts'))
 app.use(authRoutes)
 app.use(userRoutes)
+app.use(cameraRoutes)
+app.use(counterRoutes)
 app.use((req,
          res,
          next) => {

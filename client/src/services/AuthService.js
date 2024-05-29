@@ -2,10 +2,10 @@ import api from '@/services/api'
 
 export default {
   async profile() {
-    return await api().get('api/profile', {withCredentials: true})
+    return await api().get('profile', {withCredentials: true})
   },
-  async login (username, password) {
-    return await api().post('login', {username, password}, {withCredentials: true})
+  async login (login, password) {
+    return await api().post('login', {login, password}, {withCredentials: true})
   },
   async logout () {
     return await api().post('logout', {}, {withCredentials: true})

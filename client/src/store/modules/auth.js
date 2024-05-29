@@ -10,7 +10,7 @@ export const auth = {
   state: initialState,
   actions: {
     login({ commit }, user) {
-      return AuthService.login(user.username, user.password).then(
+      return AuthService.login(user.login, user.password).then(
         user => {
           commit('loginSuccess', user.data);
           return Promise.resolve(user);
@@ -30,7 +30,7 @@ export const auth = {
       )
     },
     register({ commit }, user) {
-      return AuthService.signup(user.username, user.password, user.firstname, user.lastname).then(
+      return AuthService.signup(user.login, user.password, user.firstname, user.lastname).then(
         response => {
           commit('registerSuccess');
           return Promise.resolve(response.data);

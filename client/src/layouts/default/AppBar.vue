@@ -76,6 +76,11 @@ export default {
           title: 'Трансляция',
           to: '/broadcaster'
         },
+        {
+          icon: 'mdi-camera',
+          title: 'Добавить камеру',
+          to: '/camera'
+        }
       ]
     }
   },

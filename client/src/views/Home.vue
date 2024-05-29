@@ -1,11 +1,9 @@
 <template>
-<!--  <HelloWorld />-->
-  <list-of-broadcasters />
+  <v-container>
+    <counters />
+  </v-container>
 </template>
 
 <script setup>
-  import HelloWorld from '@/components/HelloWorld.vue'
-  import ListOfBroadcasters from "@/components/streaming/ListOfBroadcasters";
-
-
+  import Counters from "@/views/Counters.vue";
 </script>

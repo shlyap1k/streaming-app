@@ -53,13 +53,18 @@ const routes = [
         name: 'Posts List',
         component: () => import(/* webpackChunkName: "home" */ '@/components/PostsList.vue'),
       },
+      {
+        path: 'camera',
+        name: 'add new camera',
+        component: () => import('@/views/Camera.vue')
+      }
 
     ],
   },
 ]
 
 const router = createRouter({
-  history: createWebHistory('/streaming-app/'),
+  history: createWebHistory('/'),
   routes,
 })
 

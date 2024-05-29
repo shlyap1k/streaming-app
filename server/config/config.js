@@ -1,7 +1,7 @@
 module.exports = {
-    port: 8081,
+    port: 3000,
     dbPort: 27017,
-    dbURL: 'mongodb://localhost/articles',
+    dbURL: 'mongodb://db/articles',
     dbOptions: {},
     secret: 'my secret key is aboba',
     maxAge: 3 * 24 * 60 * 60,
